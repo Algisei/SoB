@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fractal Generator</title>
+    <style>
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        body{
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <label for="fractalType">Fractal Type:</label>
+        <select id="fractalType">
+            <option value="mandelbrot">Mandelbrot Set</option>
+            <option value="julia">Julia Set</option>
+            <option value="burning_ship">Burning Ship</option>
+        </select><br>
+        Please select your favorite interpolation type (it affects zoom and moving)<br>
+        <input type="radio" id="linear" name="interpolation" value="linear" checked>
+        <label for="linear">linear</label><br>
+        <input type="radio" id="exponent" name="interpolation" value="exponent">
+        <label for="exponent">exponent</label><br>
+        <label for="maxIterations">Max Iterations:</label>
+        <input type="number" id="maxIterations" value="100"><br>
+        <label for="escapeRadius">Escape Radius:</label>
+        <input type="number" id="escapeRadius" value="100"><br>
+        <button id="generateButton">Generate Fractal</button>
+        <br>
+        <button id="zoomInButton">Zoom In</button>
+        <button id="zoomOutButton">Zoom Out</button>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.x/dist/pixi.min.js"></script>
+    <script>
+// Создаём приложение PixiJS
+const app = new PIXI.Application({
+    width: window.innerWidth,
+    height: window.innerHeight,
+    backgroundColor: 0x000000,
+});
+document.body.appendChild(app.view);
+
+// Получаем элементы управления
+const fractalTypeSelect = document.getElementById('fractalType');
+const interpolationTypeLinear = document.getElementById('linear');
+const interpolationTypeExponent = document.getElementById('exponent');
+const maxIterationsInput = document.getElementById('maxIterations');
+const escapeRadiusInput = document.getElementById('escapeRadius');
+const generateButton = document.getElementById('generateButton');
+const zoomInButton = document.getElementById('zoomInButton');
+const zoomOutButton = document.getElementById('zoomOutButton');
+
+// Параметры фрактала
+let fractalType = fractalTypeSelect.value;
+let maxIterations = parseInt(maxIterationsInput.value);
+let escapeRadius = parseInt(escapeRadiusInput.value);
+let zoomLevel = 1;
+let targetZoomLevel = 1;
+let centerX = 0;
+let centerY = 0;
+let targetCenterX = 0;
+let targetCenterY = 0;
+const zoomFactor = 1.5;
+const moveFactor = 0.1;
+
+// Параметры для множества Жюлиа
+const juliaConstant = { real: -0.7, imag: 0.27015 };
+
+
+// Создаём текстуру для фрактала
+const fractalTexture = PIXI.RenderTexture.create({ width: app.screen.width, height: app.screen.height });
+const fractalSprite = new PIXI.Sprite(fractalTexture);
+app.stage.addChild(fractalSprite);
+
+// Функция для линейной интерполяции цветов
+function interpolateColor(color1, color2, factor) {
+    const result = color1.slice();
+    for (let i = 0; i < 3; i++) {
+        result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
+    }
+    return result;
+}
+
+// Функция для получения цвета
+function getColor(iterations) {
+    if (iterations === maxIterations) return 0x000000;
+    
+    const colors = [
+        [0, 0, 0.5],  // dark blue
+        [0, 0, 1],    // blue
+        [0, 1, 1],    // cyan
+        [0, 1, 0],    // green
+        [1, 1, 0],    // yellow
+        [1, 0.5, 0],  // orange
+        [1, 0, 0],    // red
+        [0.5, 0, 0]   // dark red
+    ];
+
+    const factor = iterations / maxIterations;
+    const index = Math.floor(factor * (colors.length - 1));
+    const colorFactor = factor * (colors.length - 1) - index;
+    
+    const color = interpolateColor(colors[index], colors[index + 1], colorFactor);
+    return PIXI.utils.rgb2hex(color);
+}
+
+
+
+// Функция для генерации множества Мандельброта
+function generateMandelbrot() {
+    const imageData = new Uint8Array(app.screen.width * app.screen.height * 4);
+
+    for (let x = 0; x < app.screen.width; x++) {
+        for (let y = 0; y < app.screen.height; y++) {
+            let real = (x - app.screen.width / 2) * 4 / (app.screen.width * zoomLevel) + centerX;
+            let imag = (y - app.screen.height / 2) * 4 / (app.screen.height * zoomLevel) + centerY;
+            let cReal = real;
+            let cImag = imag;
+            let iterations = 0;
+
+            while (real * real + imag * imag <= escapeRadius && iterations < maxIterations) {
+                let tempReal = real * real - imag * imag + cReal;
+                imag = 2 * real * imag + cImag;
+                real = tempReal;
+                iterations++;
+            }
+
+            const color = PIXI.utils.hex2rgb(getColor(iterations));
+            const idx = (y * app.screen.width + x) * 4;
+            imageData[idx] = Math.floor(color[0] * 255);
+            imageData[idx + 1] = Math.floor(color[1] * 255);
+            imageData[idx + 2] = Math.floor(color[2] * 255);
+            imageData[idx + 3] = 255;
+        }
+    }
+
+    const texture = PIXI.Texture.fromBuffer(imageData, app.screen.width, app.screen.height);
+    fractalSprite.texture = texture;
+}
+
+// Функция для генерации множества Жюлиа
+function generateJulia() {
+    const imageData = new Uint8Array(app.screen.width * app.screen.height * 4);
+
+    for (let x = 0; x < app.screen.width; x++) {
+        for (let y = 0; y < app.screen.height; y++) {
+            let real = (x - app.screen.width / 2) * 4 / (app.screen.width * zoomLevel) + centerX;
+            let imag = (y - app.screen.height / 2) * 4 / (app.screen.height * zoomLevel) + centerY;
+            let iterations = 0;
+
+            while (real * real + imag * imag <= escapeRadius && iterations < maxIterations) {
+                let tempReal = real * real - imag * imag + juliaConstant.real;
+                imag = 2 * real * imag + juliaConstant.imag;
+                real = tempReal;
+                iterations++;
+            }
+
+            const color = PIXI.utils.hex2rgb(getColor(iterations));
+            const idx = (y * app.screen.width + x) * 4;
+            imageData[idx] = Math.floor(color[0] * 255);
+            imageData[idx + 1] = Math.floor(color[1] * 255);
+            imageData[idx + 2] = Math.floor(color[2] * 255);
+            imageData[idx + 3] = 255;
+        }
+    }
+
+    const texture = PIXI.Texture.fromBuffer(imageData, app.screen.width, app.screen.height);
+    fractalSprite.texture = texture;
+}
+
+// Функция для генерации множества Burning Ship
+function generateBurningShip() {
+    const imageData = new Uint8Array(app.screen.width * app.screen.height * 4);
+
+    for (let x = 0; x < app.screen.width; x++) {
+        for (let y = 0; y < app.screen.height; y++) {
+            let real = (x - app.screen.width / 2) * 4 / (app.screen.width * zoomLevel) + centerX;
+            let imag = (y - app.screen.height / 2) * 4 / (app.screen.height * zoomLevel) + centerY;
+            let cReal = real;
+            let cImag = imag;
+            let iterations = 0;
+
+            while (real * real + imag * imag <= escapeRadius && iterations < maxIterations) {
+                let tempReal = real * real - imag * imag + cReal;
+                imag = Math.abs(2 * real * imag) + cImag;
+                real = Math.abs(tempReal);
+                iterations++;
+            }
+
+            const color = PIXI.utils.hex2rgb(getColor(iterations));
+            const idx = (y * app.screen.width + x) * 4;
+            imageData[idx] = Math.floor(color[0] * 255);
+            imageData[idx + 1] = Math.floor(color[1] * 255);
+            imageData[idx + 2] = Math.floor(color[2] * 255);
+            imageData[idx + 3] = 255;
+        }
+    }
+
+    const texture = PIXI.Texture.fromBuffer(imageData, app.screen.width, app.screen.height);
+    fractalSprite.texture = texture;
+}
+
+// Функция для генерации фрактала в зависимости от выбранного типа
+function generateFractal() {
+    if (fractalType === 'mandelbrot') {
+        generateMandelbrot();
+    } else if (fractalType === 'julia') {
+        generateJulia();
+    } else if (fractalType === 'burning_ship') {
+        generateBurningShip();
+    }
+}
+
+// Обработчик события кнопки генерации фрактала
+generateButton.addEventListener('click', () => {
+    fractalType = fractalTypeSelect.value;
+    maxIterations = parseInt(maxIterationsInput.value);
+    escapeRadius = parseInt(escapeRadiusInput.value);
+    generateFractal();
+});
+
+// Функция плавного обновления зума и позиции
+function updateView() {
+    const lerp = (start, end, amt) => (1 - amt) * start + amt * end;
+    const smoothStep = amt => amt * amt * (3 - 2 * amt);
+    const interpolationType = document.querySelector('input[name="interpolation"]:checked').value;
+    let interpolationFactor = 0.1; // Default linear
+
+    if (interpolationType === 'exponent') {
+        interpolationFactor = smoothStep(0.1);
+    }
+
+    zoomLevel = lerp(zoomLevel, targetZoomLevel, interpolationFactor);
+    centerX = lerp(centerX, targetCenterX, interpolationFactor);
+    centerY = lerp(centerY, targetCenterY, interpolationFactor);
+    generateFractal();
+    requestAnimationFrame(updateView);
+}
+
+// Обработчик событий кнопок зума
+zoomInButton.addEventListener('click', () => {
+    targetZoomLevel *= zoomFactor;
+});
+
+zoomOutButton.addEventListener('click', () => {
+    targetZoomLevel /= zoomFactor;
+});
+
+// to check focus
+function isInputFocused() {
+    return document.activeElement === maxIterationsInput ||
+           document.activeElement === escapeRadiusInput ||
+           document.activeElement === interpolationTypeExponent||
+           document.activeElement === interpolationTypeLinear||
+           document.activeElement === fractalTypeSelect;
+}
+
+
+// Обработчик событий клавиатуры для перемещения
+window.addEventListener('keydown', (event) => {
+    if (isInputFocused()) return;
+    switch (event.key) {
+        case 'ArrowUp':
+            targetCenterY -= moveFactor / zoomLevel;
+            break;
+        case 'ArrowDown':
+            targetCenterY += moveFactor / zoomLevel;
+            break;
+        case 'ArrowLeft':
+            targetCenterX -= moveFactor / zoomLevel;
+            break;
+        case 'ArrowRight':
+            targetCenterX += moveFactor / zoomLevel;
+            break;
+    }
+});
+
+// Обработчик событий колеса мыши для зума
+window.addEventListener('wheel', (event) => {
+    if (isInputFocused()) return;
+    if (event.deltaY < 0) {
+        targetZoomLevel *= zoomFactor;
+    } else {
+        targetZoomLevel /= zoomFactor;
+    }
+});
+
+// Начинаем обновление
+updateView();
+
+
+    </script>
+</body>
+</html>

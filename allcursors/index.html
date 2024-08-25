@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Курсоры пользователей</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        .cursor {
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            position: absolute;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const ws = new WebSocket('ws://localhost:8080');
+
+        const cursors = {};
+
+        ws.onmessage = (event) => {
+            const { id, x, y } = JSON.parse(event.data);
+
+            if (!cursors[id]) {
+                const cursorElement = document.createElement('div');
+                cursorElement.className = 'cursor';
+                cursors[id] = cursorElement;
+                document.body.appendChild(cursorElement);
+            }
+
+            const cursor = cursors[id];
+            cursor.style.left = `${x}px`;
+            cursor.style.top = `${y}px`;
+        };
+
+        ws.onclose = () => {
+            Object.values(cursors).forEach(cursor => cursor.remove());
+        };
+
+        const sendCursorPosition = (x, y) => {
+            ws.send(JSON.stringify({ id: 'unique_id', x, y }));
+        };
+
+        document.addEventListener('mousemove', (event) => {
+            const x = event.clientX;
+            const y = event.clientY;
+            sendCursorPosition(x, y);
+        });
+
+        window.onbeforeunload = () => {
+            ws.close();
+        };
+    </script>
+</body>
+</html>

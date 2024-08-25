@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoB_01</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.4/pixi.min.js"></script>
+
+    <!-- Меню паузы -->
+    <div id="menu">
+        <ul>
+            <li id="resume">Resume</li>
+            <li id="scrollsMaker">ScrollsMaker</li>
+            <li id="restart">Restart</li>
+        </ul>
+    </div>
+
+    <!-- Панель слотов -->
+    <div id="slot-panel">
+        <div class="slot" data-key="1">1</div>
+        <div class="slot" data-key="2">2</div>
+        <div class="slot" data-key="3">3</div>
+        <div class="slot" data-key="4">4</div>
+        <div class="slot" data-key="5">5</div>
+        <div class="slot" data-key="6">6</div>
+        <div class="slot" data-key="7">7</div>
+        <div class="slot" data-key="8">8</div>
+        <div class="slot" data-key="9">9</div>
+        <div class="slot" data-key="0">0</div>
+    </div>
+
+    <script type="module" src="js/game.js"></script>
+    <script type="module" src="js/scrollsMaker.js"></script>
+</body>
+</html>

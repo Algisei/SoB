@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixi.js Game</title>
+    
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.0/pixi.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    
+<script>
+    // Создание приложения Pixi.js
+    let app = new PIXI.Application({
+        width: window.innerWidth,
+        height: window.innerHeight,
+        backgroundColor: 0xAAAAAA, // цвет фона
+    });
+    document.getElementById('app-container').appendChild(app.view);
+
+    // Переменные для аудио
+    let audioContext;
+    let oscillator;
+    let gainNode;
+    let audioInitialized = false;
+
+    function initAudio() {
+        if (!audioInitialized) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            oscillator = audioContext.createOscillator();
+            gainNode = audioContext.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(100, audioContext.currentTime); // частота звука
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime); // начальная громкость
+            oscillator.start();
+
+            audioInitialized = true;
+        }
+    }
+
+    // Функция генерации мозаики с использованием диаграммы Вороного
+    function generateMosaic(numCells) {
+        // Очистка предыдущих элементов, если они есть
+        app.stage.removeChildren();
+
+        // Генерация случайных точек для диаграммы Вороного
+        let points = [];
+        for (let i = 0; i < numCells; i++) {
+            points.push([Math.random() * app.renderer.width, Math.random() * app.renderer.height]);
+        }
+
+        // Вычисление диаграммы Вороного
+        let voronoi = d3.voronoi().extent([[0, 0], [app.renderer.width, app.renderer.height]]);
+        let diagram = voronoi(points);
+
+        // Переменная для хранения правильного элемента
+        let correctElement;
+        let correctElementIndex = Math.floor(Math.random() * numCells);
+
+        // Создание ячеек
+        diagram.polygons().forEach((cell, i) => {
+            let graphics = new PIXI.Graphics();
+            let color = Math.random() * 0xFFFFFF;
+            graphics.beginFill(color);
+
+            graphics.moveTo(cell[0][0], cell[0][1]);
+            for (let j = 1; j < cell.length; j++) {
+                graphics.lineTo(cell[j][0], cell[j][1]);
+            }
+            graphics.closePath();
+            graphics.endFill();
+
+            app.stage.addChild(graphics);
+
+            graphics.eventMode = 'static'; // использование нового свойства eventMode
+            graphics.cursor = 'pointer';
+            graphics.on('pointerdown', () => {
+                initAudio(); // Инициализация аудио при первом клике мыши
+
+                if (graphics === correctElement) {
+                    if (numCells < 300) {
+                        generateMosaic(numCells + 10); // увеличение числа ячеек
+                    } else {
+                        alert("Вы прошли все уровни!");
+                    }
+                }
+            });
+
+            // Определение элемента, который нужно найти
+            if (i === correctElementIndex) {
+                correctElement = graphics;
+            }
+        });
+
+        // Добавление эффекта увеличивающейся подсветки и изменения звука
+        app.stage.eventMode = 'static'; // использование нового свойства eventMode
+        app.stage.on('pointermove', (event) => {
+            if (audioInitialized) {
+                let mousePosition = event.global;
+                if (correctElement) {
+                    let cellCenter = getCellCenter(correctElement);
+                    let distance = Math.hypot(mousePosition.x - cellCenter.x, mousePosition.y - cellCenter.y);
+                    let maxDistance = 200; // Максимальное расстояние для подсветки
+                    let alpha = Math.max(0, 1 - distance / maxDistance);
+                    correctElement.alpha = 0.5 + 0.5 * alpha; // Подсветка от 0.5 до 1
+
+                    let volume = Math.max(0, 1 - distance / maxDistance); // Уровень громкости от 0 до 1
+                    gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+                }
+            }
+        });
+    }
+
+    // Функция для вычисления центра ячейки
+    function getCellCenter(graphics) {
+        let bounds = graphics.getBounds();
+        return {
+            x: bounds.x + bounds.width / 2,
+            y: bounds.y + bounds.height / 2
+        };
+    }
+
+    // Генерация первой мозаики с начальным числом ячеек
+    generateMosaic(10);
+</script>
+
+    
+    
+    
+
+
+</body>
+</html>

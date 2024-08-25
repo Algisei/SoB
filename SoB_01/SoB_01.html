@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoB_01</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #menu {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: black;
+            color: green;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            padding: 20px;
+            border: 2px solid green;
+            z-index: 1000;
+        }
+        #menu ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        #menu li {
+            padding: 10px 0;
+            cursor: pointer;
+        }
+        #menu li:hover {
+            background: green;
+            color: black;
+        }
+        #slot-panel {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+        }
+        .slot {
+            width: 50px;
+            height: 50px;
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', Courier, monospace;
+            color: white;
+            background: black;
+        }
+        .slot.active {
+            border-color: green;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.4/pixi.min.js"></script>
+
+    <!-- Меню паузы -->
+    <div id="menu">
+        <ul>
+            <li id="resume">Resume</li>
+            <li id="scrollsMaker">ScrollsMaker</li>
+            <li id="restart">Restart</li>
+        </ul>
+    </div>
+
+    <!-- Панель слотов -->
+    <div id="slot-panel">
+        <div class="slot" data-key="1">1</div>
+        <div class="slot" data-key="2">2</div>
+        <div class="slot" data-key="3">3</div>
+        <div class="slot" data-key="4">4</div>
+        <div class="slot" data-key="5">5</div>
+        <div class="slot" data-key="6">6</div>
+        <div class="slot" data-key="7">7</div>
+        <div class="slot" data-key="8">8</div>
+        <div class="slot" data-key="9">9</div>
+        <div class="slot" data-key="0">0</div>
+    </div>
+    <script src="js/game.js"></script>
+    <script src="js/scrollsMaker.js"></script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fractal Generator</title>
+    <style>
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        body {
+            overflow: hidden;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <label for="fractalType">Fractal Type:</label>
+        <select id="fractalType">
+            <option value="mandelbrot">Mandelbrot Set</option>
+            <option value="julia">Julia Set</option>
+            <option value="burning_ship">Burning Ship</option>
+        </select><br>
+        Please select your favorite interpolation type (it affects zoom and moving)<br>
+        <input type="radio" id="linear" name="interpolation" value="linear" checked>
+        <label for="linear">linear</label><br>
+        <input type="radio" id="exponent" name="interpolation" value="exponent">
+        <label for="exponent">exponent</label><br>
+        <label for="maxIterations">Max Iterations:</label>
+        <input type="number" id="maxIterations" value="100"><br>
+        <label for="escapeRadius">Escape Radius:</label>
+        <input type="number" id="escapeRadius" value="100"><br>
+        <button id="generateButton">Generate Fractal</button>
+        <br>
+        <button id="zoomInButton">Zoom In</button>
+        <button id="zoomOutButton">Zoom Out</button>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.x/dist/pixi.min.js"></script>
+    <script>
+        let app;
+
+        function createApp() {
+            app = new PIXI.Application({
+                width: window.innerWidth,
+                height: window.innerHeight,
+                backgroundColor: 0x000000,
+                resolution: window.devicePixelRatio || 1,
+            });
+            document.body.appendChild(app.view);
+
+            app.view.addEventListener('webglcontextlost', (event) => {
+                event.preventDefault();
+                cancelAnimationFrame(animateId);
+                console.log("WebGL context was lost.");
+            }, false);
+
+            app.view.addEventListener('webglcontextrestored', () => {
+                console.log("WebGL context was restored.");
+                initFractal();
+                animate();
+            }, false);
+
+            initFractal();
+            animate();
+        }
+
+        const fractalTypeSelect = document.getElementById('fractalType');
+        const interpolationTypeLinear = document.getElementById('linear');
+        const interpolationTypeExponent = document.getElementById('exponent');
+        const maxIterationsInput = document.getElementById('maxIterations');
+        const escapeRadiusInput = document.getElementById('escapeRadius');
+        const generateButton = document.getElementById('generateButton');
+        const zoomInButton = document.getElementById('zoomInButton');
+        const zoomOutButton = document.getElementById('zoomOutButton');
+
+        let fractalType = fractalTypeSelect.value;
+        let maxIterations = parseInt(maxIterationsInput.value);
+        let escapeRadius = parseInt(escapeRadiusInput.value);
+        let zoomLevel = 1;
+        let targetZoomLevel = 1;
+        let centerX = 0;
+        let centerY = 0;
+        let targetCenterX = 0;
+        let targetCenterY = 0;
+        const zoomFactor = 1.5;
+        const moveFactor = 0.1;
+        const juliaConstant = { real: -0.7, imag: 0.27015 };
+        let shaderProgram, quad;
+        let animateId;
+
+        const fragmentShader = `
+        precision highp float;
+        uniform float zoomLevel;
+        uniform float centerX;
+        uniform float centerY;
+        uniform int maxIterations;
+        uniform float escapeRadius;
+        uniform int fractalType;
+        uniform vec2 juliaConstant;
+        varying vec2 vTextureCoord;
+
+        vec4 getColor(float iterations) {
+            if (iterations == float(maxIterations)) return vec4(0.0, 0.0, 0.0, 1.0);
+
+            vec3 color = vec3(0.0);
+            float t = iterations / float(maxIterations);
+            if (t < 0.142857) {
+                color = mix(vec3(0.0, 0.0, 0.5), vec3(0.0, 0.0, 1.0), t / 0.142857);
+            } else if (t < 0.285714) {
+                color = mix(vec3(0.0, 0.0, 1.0), vec3(0.0, 1.0, 1.0), (t - 0.142857) / 0.142857);
+            } else if (t < 0.428571) {
+                color = mix(vec3(0.0, 1.0, 1.0), vec3(0.0, 1.0, 0.0), (t - 0.285714) / 0.142857);
+            } else if (t < 0.571429) {
+                color = mix(vec3(0.0, 1.0, 0.0), vec3(1.0, 1.0, 0.0), (t - 0.428571) / 0.142857);
+            } else if (t < 0.714286) {
+                color = mix(vec3(1.0, 1.0, 0.0), vec3(1.0, 0.5, 0.0), (t - 0.571429) / 0.142857);
+            } else if (t < 0.857143) {
+                color = mix(vec3(1.0, 0.5, 0.0), vec3(1.0, 0.0, 0.0), (t - 0.714286) / 0.142857);
+            } else {
+                color = mix(vec3(1.0, 0.0, 0.0), vec3(0.5, 0.0, 0.0), (t - 0.857143) / 0.142857);
+            }
+
+            return vec4(color, 1.0);
+        }
+
+        void main() {
+            float real, imag, cReal, cImag;
+            if (fractalType == 0) { // Mandelbrot
+                real = (vTextureCoord.x - 0.5) * 4.0 / zoomLevel + centerX;
+                imag = (vTextureCoord.y - 0.5) * 4.0 / zoomLevel + centerY;
+                cReal = real;
+                cImag = imag;
+            } else if (fractalType == 1) { // Julia
+                real = (vTextureCoord.x - 0.5) * 4.0 / zoomLevel + centerX;
+                imag = (vTextureCoord.y - 0.5) * 4.0 / zoomLevel + centerY;
+                cReal = juliaConstant.x;
+                cImag = juliaConstant.y;
+            } else if (fractalType == 2) { // Burning Ship
+                real = (vTextureCoord.x - 0.5) * 4.0 / zoomLevel + centerX;
+                imag = (vTextureCoord.y - 0.5) * 4.0 / zoomLevel + centerY;
+                cReal = real;
+                cImag = imag;
+            }
+
+            float iterations = 0.0;
+            for (int i = 0; i < 1000; i++) {
+                if (iterations >= float(maxIterations)) break;
+
+                float tempReal = real * real - imag * imag + cReal;
+                if (fractalType == 2) { // Burning Ship
+                    imag = abs(2.0 * real * imag) + cImag;
+                    real = abs(tempReal);
+                } else {
+                    imag = 2.0 * real * imag + cImag;
+                    real = tempReal;
+                }
+
+                if (real * real + imag * imag > escapeRadius) break;
+
+                iterations += 1.0;
+            }
+
+            gl_FragColor = getColor(iterations);
+        }
+        `;
+
+        const vertexShader = `
+        precision mediump float;
+        attribute vec2 aVertexPosition;
+        attribute vec2 aTextureCoord;
+        uniform mat3 projectionMatrix;
+        varying vec2 vTextureCoord;
+
+        void main() {
+            vTextureCoord = aTextureCoord;
+            gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
+        }
+        `;
+
+        function initFractal() {
+            const uniforms = {
+                zoomLevel: zoomLevel,
+                centerX: centerX,
+                centerY: centerY,
+                maxIterations: maxIterations,
+                escapeRadius: escapeRadius,
+                fractalType: fractalType === "mandelbrot" ? 0 : fractalType === "julia" ? 1 : 2,
+                juliaConstant: [juliaConstant.real, juliaConstant.imag]
+            };
+
+            shaderProgram = new PIXI.Shader.from(vertexShader, fragmentShader, uniforms);
+
+            const geometry = new PIXI.Geometry()
+                .addAttribute('aVertexPosition', 
+                    [-1, -1, // x, y
+                      1, -1, // x, y
+                      1,  1, // x, y
+                     -1,  1], // x, y
+                    2) // the size of the attribute
+                .addAttribute('aTextureCoord', 
+                    [0, 0, 
+                     1, 0,
+                     1, 1, 
+                     0, 1], 
+                    2)
+                .addIndex([0, 1, 2, 0, 2, 3]);
+
+            quad = new PIXI.Mesh(geometry, shaderProgram);
+
+            app.stage.addChild(quad);
+
+            generateFractal();
+        }
+
+        function generateFractal() {
+            fractalType = fractalTypeSelect.value;
+            maxIterations = parseInt(maxIterationsInput.value);
+            escapeRadius = parseInt(escapeRadiusInput.value);
+
+            shaderProgram.uniforms.fractalType = fractalType === "mandelbrot" ? 0 : fractalType === "julia" ? 1 : 2;
+            shaderProgram.uniforms.maxIterations = maxIterations;
+            shaderProgram.uniforms.escapeRadius = escapeRadius;
+            shaderProgram.uniforms.zoomLevel = zoomLevel;
+            shaderProgram.uniforms.centerX = centerX;
+            shaderProgram.uniforms.centerY = centerY;
+        }
+
+        generateButton.addEventListener('click', generateFractal);
+        zoomInButton.addEventListener('click', () => {
+            targetZoomLevel *= zoomFactor;
+        });
+        zoomOutButton.addEventListener('click', () => {
+            targetZoomLevel /= zoomFactor;
+        });
+
+        function interpolate(start, end, factor) {
+            if (interpolationTypeLinear.checked) {
+                return start + (end - start) * factor;
+            } else if (interpolationTypeExponent.checked) {
+                return start * Math.pow(end / start, factor);
+            }
+        }
+
+        function animate() {
+            zoomLevel = interpolate(zoomLevel, targetZoomLevel, 0.1);
+            centerX = interpolate(centerX, targetCenterX, 0.1);
+            centerY = interpolate(centerY, targetCenterY, 0.1);
+
+            shaderProgram.uniforms.zoomLevel = zoomLevel;
+            shaderProgram.uniforms.centerX = centerX;
+            shaderProgram.uniforms.centerY = centerY;
+
+            animateId = requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('keydown', (event) => {
+            if (event.target === document.body) {
+                if (event.key === 'ArrowLeft') targetCenterX -= moveFactor / zoomLevel;
+                if (event.key === 'ArrowRight') targetCenterX += moveFactor / zoomLevel;
+                if (event.key === 'ArrowUp') targetCenterY -= moveFactor / zoomLevel;
+                if (event.key === 'ArrowDown') targetCenterY += moveFactor / zoomLevel;
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            app.renderer.resize(window.innerWidth, window.innerHeight);
+        });
+
+        createApp();
+    </script>
+</body>
+</html>

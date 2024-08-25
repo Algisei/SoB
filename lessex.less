@@ -1,0 +1,63 @@
+// Переменные
+@primary-color: #3498db;
+@secondary-color: #2ecc71;
+@text-color: #333;
+@border-radius: 8px;
+@padding: 16px;
+
+// Миксин для тени
+.shadow(@x: 0, @y: 2px, @blur: 6px, @color: rgba(0, 0, 0, 0.2)) {
+  box-shadow: @x @y @blur @color;
+}
+
+// Стили для карточки
+.card {
+  background-color: #fff;
+  border-radius: @border-radius;
+  padding: @padding;
+  border: 1px solid #ddd;
+  .shadow(0, 4px, 10px, rgba(0, 0, 0, 0.15)); // Применение миксина
+
+  // Заголовок карточки
+  .card-header {
+    font-size: 1.5em;
+    color: @primary-color;
+    margin-bottom: 10px;
+  }
+
+  // Тело карточки
+  .card-body {
+    font-size: 1em;
+    color: @text-color;
+    line-height: 1.6;
+
+    // Стили для ссылок в теле карточки
+    a {
+      color: @secondary-color;
+      text-decoration: none;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  // Футер карточки
+  .card-footer {
+    margin-top: 20px;
+    text-align: right;
+
+    .button {
+      background-color: @primary-color;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: @border-radius;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: darken(@primary-color, 10%);
+      }
+    }
+  }
+}

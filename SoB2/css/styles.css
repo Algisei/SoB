@@ -1,0 +1,60 @@
+/* styles.css */
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+#menu {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: black;
+    color: green;
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+    padding: 20px;
+    border: 2px solid green;
+    z-index: 1000;
+}
+
+#menu ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#menu li {
+    padding: 10px 0;
+    cursor: pointer;
+}
+
+#menu li:hover {
+    background: green;
+    color: black;
+}
+
+#slot-panel {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+}
+
+.slot {
+    width: 50px;
+    height: 50px;
+    border: 2px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', Courier, monospace;
+    color: white;
+    background: black;
+}
+
+.slot.active {
+    border-color: green;
+}

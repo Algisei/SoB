@@ -1,0 +1,40 @@
+.card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+.card .card-header {
+    font-size: 1.5em;
+    color: #3498db;
+    margin-bottom: 10px;
+}
+.card .card-body {
+    font-size: 1em;
+    color: #333;
+    line-height: 1.6;
+}
+.card .card-body a {
+    color: #2ecc71;
+    text-decoration: none;
+}
+.card .card-body a:hover {
+    text-decoration: underline;
+}
+.card .card-footer {
+    margin-top: 20px;
+    text-align: right;
+}
+.card .card-footer .button {
+    background-color: #3498db;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.card .card-footer .button:hover {
+    background-color: #217dbb;
+}

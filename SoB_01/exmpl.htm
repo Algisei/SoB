@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diaphragm Animation</title>
+    <style>
+      body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+.circle-menu {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+}
+
+.sector {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-color: #3498db;
+    clip-path: polygon(0% 50%, 100% 0, 100% 100%, 50% 75%);
+    
+    transform-origin: 0% 0%;
+    transition: transform 0.2s ease;
+    border-radius: 50% 50% 50% 50%;
+}
+
+#sector1 {
+    transform: rotate(0deg);
+    background-color: #3498db;
+}
+
+#sector2 {
+    transform: rotate(0deg);
+    background-color: #2ecc71;
+}
+
+#sector3 {
+    transform: rotate(0deg);
+    background-color: #f1c40f;
+}
+
+#sector4 {
+    transform: rotate(0deg);
+    background-color: #e67e22;
+}
+
+#sector5 {
+    transform: rotate(0deg);
+    background-color: #e74c3c;
+}
+
+#sector6 {
+    transform: rotate(0deg);
+    background-color: #9b59b6;
+}
+
+
+.sector:hover {
+    transform: rotate(var(--rotate)) translate(20px);
+}
+
+    </style>
+</head>
+<body>
+    <div class="circle-menu">
+        <div class="sector" id="sector1"></div>
+        <div class="sector" id="sector2"></div>
+        <div class="sector" id="sector3"></div>
+        <div class="sector" id="sector4"></div>
+        <div class="sector" id="sector5"></div>
+        <div class="sector" id="sector6"></div>
+
+    </div>
+    <script>
+        document.querySelectorAll('.sector').forEach((sector, index) => {
+    sector.style.setProperty('--rotate', `${index * 60}deg`);
+    sector.addEventListener('mouseover', () => {
+        sector.style.transform = `rotate(${index * 60}deg) translate(20px)`;
+    });
+    sector.addEventListener('mouseout', () => {
+        sector.style.transform = `rotate(${index * 60}deg)`;
+    });
+    sector.addEventListener('click', () => {
+                alert(`Sector ${index + 1} clicked!`);
+    });
+
+});
+
+    </script>
+</body>
+</html>
