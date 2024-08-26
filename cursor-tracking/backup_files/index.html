@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Курсоры пользователей и клики</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        .cursor {
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            position: absolute;
+            pointer-events: none;
+        }
+        .click {
+            width: 15px;
+            height: 15px;
+            background-color: blue;
+            border-radius: 50%;
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.6;
+            animation: fadeOut 1s forwards;
+        }
+        @keyframes fadeOut {
+            from { opacity: 0.6; }
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const ws = new WebSocket('ws://localhost:8080');
+
+        // Генерация уникального идентификатора для каждого клиента
+        const uniqueId = Math.random().toString(36).substring(2);
+
+        const cursors = {};
+
+        // Функция для генерации уникального цвета на основе идентификатора
+function generateColor(id) {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const color = `hsl(${hash % 360}, 70%, 50%)`; // Генерация цвета в формате HSL
+    return color;
+}
+
+ws.onmessage = async (event) => {
+    let message = event.data;
+    console.log("Received raw data:", message);
+
+    try {
+        if (message instanceof Blob) {
+            message = await message.text();
+            console.log("Blob converted to string:", message);
+        }
+
+        if (typeof message === 'string' && (message.startsWith('{') || message.startsWith('['))) {
+            const data = JSON.parse(message);
+            console.log("Parsed data:", data);
+
+            const { id, x, y, type } = data;
+            const color = generateColor(id);  // Генерация цвета на основе идентификатора
+
+            if (type === 'mousemove') {
+                if (!cursors[id]) {
+                    const cursorElement = document.createElement('div');
+                    cursorElement.className = 'cursor';
+                    cursorElement.style.backgroundColor = color;  // Применение цвета
+                    cursors[id] = cursorElement;
+                    document.body.appendChild(cursorElement);
+                }
+
+                const cursor = cursors[id];
+                cursor.style.left = `${x}px`;
+                cursor.style.top = `${y}px`;
+            } else if (type === 'click') {
+                const clickElement = document.createElement('div');
+                clickElement.className = 'click';
+                clickElement.style.backgroundColor = color;  // Применение цвета
+                clickElement.style.left = `${x - 7.5}px`;  // Центрируем по оси X
+                clickElement.style.top = `${y - 7.5}px`;   // Центрируем по оси Y
+                document.body.appendChild(clickElement);
+
+                setTimeout(() => {
+                    clickElement.remove();
+                }, 1000);
+            }
+        } else {
+            console.warn("Received non-JSON message or non-string message:", message);
+        }
+    } catch (error) {
+        console.error("Failed to parse JSON:", error);
+    }
+};
+
+
+        const sendEvent = (type, x, y) => {
+            const message = JSON.stringify({ id: uniqueId, type, x, y });
+            console.log("Sending message:", message);  // Логируем отправку данных
+            ws.send(message);
+        };
+
+        document.addEventListener('mousemove', (event) => {
+            const x = event.clientX;
+            const y = event.clientY;
+            sendEvent('mousemove', x, y);
+        });
+
+        document.addEventListener('click', (event) => {
+            const x = event.clientX;
+            const y = event.clientY;
+            sendEvent('click', x, y);
+        });
+
+        window.onbeforeunload = () => {
+            ws.close();
+        };
+    </script>
+</body>
+</html>
