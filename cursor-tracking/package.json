@@ -1,14 +1,9 @@
 {
-    "name": "cursor-tracking",
-    "version": "1.0.0",
-    "description": "",
-    "main": "api/server.js",
-    "dependencies": {
-      "ws": "^8.0.0"
-    },
-  
+  "name": "cursor-tracking",
+  "version": "1.0.0",
+  "description": "Real-time cursor tracking with SSE",
   "keywords": [],
   "author": "Algisei",
-  "license": "ISC"
-  
+  "license": "ISC",
+  "dependencies": {}
 }
