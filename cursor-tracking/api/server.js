@@ -1,7 +1,11 @@
 let clients = [];
 
 function sendToAllClients(data) {
-    clients.forEach(client => client.write(`data: ${JSON.stringify(data)}\n\n`));
+    clients.forEach(client => {
+        if (client.writable) {
+            client.write(`data: ${JSON.stringify(data)}\n\n`);
+        }
+    });
 }
 
 module.exports = (req, res) => {
@@ -24,10 +28,16 @@ module.exports = (req, res) => {
         });
 
         req.on('end', () => {
-            sendToAllClients(JSON.parse(data));
-            res.status(200).end();
+            try {
+                const parsedData = JSON.parse(data);
+                sendToAllClients(parsedData);
+                res.status(200).end();
+            } catch (error) {
+                console.error('Failed to parse JSON:', error);
+                res.status(400).send('Invalid JSON');
+            }
         });
     } else {
-        res.status(405).end();
+        res.status(405).end('Method Not Allowed');
     }
 };
