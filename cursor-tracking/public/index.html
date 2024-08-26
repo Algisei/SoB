@@ -78,34 +78,51 @@
         }
 
         document.addEventListener('mousemove', (event) => {
-            fetch('/api', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    id: 'your-unique-client-id', // Уникальный идентификатор клиента
-                    x: event.clientX,
-                    y: event.clientY,
-                    type: 'mousemove'
-                })
-            });
-        });
+    fetch('/api', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            id: 'your-unique-client-id', // Уникальный идентификатор клиента
+            x: event.clientX,
+            y: event.clientY,
+            type: 'mousemove'
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.text();
+    })
+    .then(data => console.log('Success:', data))
+    .catch(error => console.error('Error:', error));
+});
 
-        document.addEventListener('click', (event) => {
-            fetch('/api', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    id: 'your-unique-client-id', // Уникальный идентификатор клиента
-                    x: event.clientX,
-                    y: event.clientY,
-                    type: 'click'
-                })
-            });
-        });
+document.addEventListener('click', (event) => {
+    fetch('/api', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            id: 'your-unique-client-id',
+            x: event.clientX,
+            y: event.clientY,
+            type: 'click'
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.text();
+    })
+    .then(data => console.log('Success:', data))
+    .catch(error => console.error('Error:', error));
+});
+
     </script>
 </body>
 </html>
