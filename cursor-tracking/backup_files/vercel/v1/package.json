@@ -1,0 +1,14 @@
+{
+    "name": "cursor-tracking",
+    "version": "1.0.0",
+    "description": "",
+    "main": "api/server.js",
+    "dependencies": {
+      "ws": "^8.0.0"
+    },
+  
+  "keywords": [],
+  "author": "Algisei",
+  "license": "ISC"
+  
+}
