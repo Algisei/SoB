@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cursor Tracking</title>
+    <style>
+        /* Стили для курсора и кликов */
+        .cursor {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: red; /* По дефолту, цвет будет заменяться на уникальный */
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .click {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: blue; /* По дефолту, цвет будет заменяться на уникальный */
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fadeOut 1s forwards;
+        }
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const eventSource = new EventSource('/api');
+        const cursors = {};
+
+        eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const { id, x, y, type } = data;
+            const color = generateColor(id);
+
+            if (type === 'mousemove') {
+                if (!cursors[id]) {
+                    const cursorElement = document.createElement('div');
+                    cursorElement.className = 'cursor';
+                    cursorElement.style.backgroundColor = color;
+                    cursors[id] = cursorElement;
+                    document.body.appendChild(cursorElement);
+                }
+
+                const cursor = cursors[id];
+                cursor.style.left = `${x}px`;
+                cursor.style.top = `${y}px`;
+            } else if (type === 'click') {
+                const clickElement = document.createElement('div');
+                clickElement.className = 'click';
+                clickElement.style.backgroundColor = color;
+                clickElement.style.left = `${x - 7.5}px`;
+                clickElement.style.top = `${y - 7.5}px`;
+                document.body.appendChild(clickElement);
+
+                setTimeout(() => {
+                    clickElement.remove();
+                }, 1000);
+            }
+        };
+
+        function generateColor(id) {
+            let hash = 0;
+            for (let i = 0; i < id.length; i++) {
+                hash = id.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return `hsl(${hash % 360}, 70%, 50%)`;
+        }
+
+        document.addEventListener('mousemove', (event) => {
+            fetch('/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: 'your-unique-client-id', // Уникальный идентификатор клиента
+                    x: event.clientX,
+                    y: event.clientY,
+                    type: 'mousemove'
+                })
+            });
+        });
+
+        document.addEventListener('click', (event) => {
+            fetch('/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: 'your-unique-client-id', // Уникальный идентификатор клиента
+                    x: event.clientX,
+                    y: event.clientY,
+                    type: 'click'
+                })
+            });
+        });
+    </script>
+</body>
+</html>
