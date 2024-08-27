@@ -91,12 +91,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.message) {
                     addMessageToList(data);
                 }
-                setTimeout(pollMessages, 5000);  // Повторяем опрос каждые 5 секунд
+                setTimeout(pollMessages, 10000);  // Увеличение интервала до 10 секунд
             })
             .catch(() => {
-                setTimeout(pollMessages, 5000);  // В случае ошибки повторяем запрос через 5 секунд
+                setTimeout(pollMessages, 10000);  // В случае ошибки повторяем запрос через 10 секунд
             });
     }
-
+    
     pollMessages();  // Запуск частого опроса
 });
