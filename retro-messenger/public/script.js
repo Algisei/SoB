@@ -1,102 +1,75 @@
-// document.addEventListener('DOMContentLoaded', () => {
-//     const messageForm = document.querySelector('.message-form');
-//     const textarea = messageForm.querySelector('textarea');
-//     const messageList = document.querySelector('.message-list');
-    
-//     const userId = `User-${Math.floor(Math.random() * 1000)}`;  // Генерация уникального идентификатора пользователя
-
-//     // Функция для добавления сообщения в список
-//     function addMessageToList(message) {
-//         const messageElement = document.createElement('div');
-//         messageElement.innerHTML = `<strong>${message.userId}:</strong> ${message.message} <small>${new Date(message.timestamp).toLocaleString()}</small>`;
-//         messageList.appendChild(messageElement);
-//         messageList.scrollTop = messageList.scrollHeight;
-//     }
-
-//     // Отправка сообщения на сервер
-//     messageForm.querySelector('button').addEventListener('click', () => {
-//         const message = textarea.value.trim();
-//         if (message) {
-//             fetch('/api/server', {
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                 },
-//                 body: JSON.stringify({ message, userId }),
-//             }).then(() => {
-//                 textarea.value = '';
-//             });
-//         }
-//     });
-
-//     // Долгий опрос для получения новых сообщений
-//     function pollMessages() {
-//         fetch('/api/server')
-//             .then(response => response.json())
-//             .then(data => {
-//                 addMessageToList(data);
-//                 pollMessages();  // Повторяем долгий опрос
-//             })
-//             .catch(() => {
-//                 setTimeout(pollMessages, 5000);  // В случае ошибки повторяем запрос через 5 секунд
-//             });
-//     }
-
-//     pollMessages();  // Запуск долгого опроса
-
-//     // // Пример работы с потоками (должны быть реализованы на сервере)
-//     // const threads = ['Thread 1', 'Thread 2', 'Thread 3'];
-//     // threads.forEach(thread => {
-//     //     const threadElement = document.createElement('div');
-//     //     threadElement.textContent = thread;
-//     //     threadList.appendChild(threadElement);
-//     // });
-// });
 document.addEventListener('DOMContentLoaded', () => {
     const messageForm = document.querySelector('.message-form');
     const textarea = messageForm.querySelector('textarea');
     const messageList = document.querySelector('.message-list');
-    
-    const userId = `User-${Math.floor(Math.random() * 1000)}`;  // Генерация уникального идентификатора пользователя
+    const threadList = document.querySelector('.thread-list');
+    const userIdElement = document.getElementById('user-id');
 
-    // Функция для добавления сообщения в список
-    function addMessageToList(message) {
+    const userId = 'User-' + Date.now();
+    userIdElement.textContent = `(${userId})`;
+
+    messageForm.querySelector('button').addEventListener('click', () => {
+        const message = textarea.value.trim();
+        if (message) {
+            sendMessage(message, userId);
+            textarea.value = '';
+        }
+    });
+
+    function addMessageToList(messageData) {
         const messageElement = document.createElement('div');
-        messageElement.innerHTML = `<strong>${message.userId}:</strong> ${message.message} <small>${new Date(message.timestamp).toLocaleString()}</small>`;
+        messageElement.textContent = `[${messageData.timestamp}] ${messageData.userId}: ${messageData.message}`;
         messageList.appendChild(messageElement);
         messageList.scrollTop = messageList.scrollHeight;
     }
 
-    // Отправка сообщения на сервер
-    messageForm.querySelector('button').addEventListener('click', () => {
-        const message = textarea.value.trim();
-        if (message) {
-            fetch('/api/server', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ message, userId }),
-            }).then(() => {
-                textarea.value = '';
-            });
-        }
-    });
+    function sendMessage(message, userId) {
+        fetch('/api/server', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message, userId }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'Message sent') {
+                console.log('Message sent successfully');
+            }
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+        });
+    }
 
-    // Частый опрос для получения новых сообщений
-    function pollMessages() {
+    function pollForMessages() {
         fetch('/api/server')
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    addMessageToList(data);
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
                 }
-                setTimeout(pollMessages, 10000);  // Увеличение интервала до 10 секунд
+                return response.json();
             })
-            .catch(() => {
-                setTimeout(pollMessages, 10000);  // В случае ошибки повторяем запрос через 10 секунд
+            .then(data => {
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(addMessageToList);
+                } else if (data.message) {
+                    addMessageToList(data.message);
+                }
+                setTimeout(pollForMessages, 10);  // Ожидание 1 секунды перед следующим запросом
+            })
+            .catch(error => {
+                console.error('Error fetching messages:', error);
+                setTimeout(pollForMessages, 100);  // Повтор через 10 секунд в случае ошибки
             });
     }
-    
-    pollMessages();  // Запуск частого опроса
+
+    pollForMessages();
+
+    const threads = ['Thread 1', 'Thread 2', 'Thread 3'];
+    threads.forEach(thread => {
+        const threadElement = document.createElement('div');
+        threadElement.textContent = thread;
+        threadList.appendChild(threadElement);
+    });
 });
