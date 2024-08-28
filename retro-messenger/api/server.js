@@ -5,11 +5,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+
 // Endpoint для приема отчетов CSP
+app.use((req, res, next) => {
+    res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; report-uri /csp-report");
+    next();
+});
+
 app.post('/csp-report', (req, res) => {
     console.log('CSP Violation:', req.body);
     res.status(204).send(); // Отправляем ответ без содержимого
 });
+
 
 
 let messages = []; // Хранилище сообщений
