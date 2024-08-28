@@ -31,7 +31,7 @@ wss.on('connection', (ws) => {
             };
             messages.push(newMessage);
 
-            // Рассылаем новое сообщение всем подключенным клиентам
+            // Рассылко нового сообщения всем подключенным клиентам
             wss.clients.forEach((client) => {
                 if (client.readyState === WebSocket.OPEN) {
                     client.send(JSON.stringify({ type: 'message', message: newMessage }));
