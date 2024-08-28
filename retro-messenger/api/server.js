@@ -5,14 +5,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Добавляем заголовок Content-Security-Policy ко всем ответам
-app.use((req, res, next) => {
-    res.setHeader(
-        'Content-Security-Policy',
-        "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:;"
-    );
-    next();
+// Endpoint для приема отчетов CSP
+app.post('/csp-report', (req, res) => {
+    console.log('CSP Violation:', req.body);
+    res.status(204).send(); // Отправляем ответ без содержимого
 });
+
 
 let messages = []; // Хранилище сообщений
 let clients = [];  // Хранилище клиентов для долгих опросов
