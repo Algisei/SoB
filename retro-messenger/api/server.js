@@ -17,7 +17,7 @@ let messages = []; // Хранилище сообщений
 wss.on('connection', (ws) => {
     console.log('Client connected');
 
-    // Отправляем все предыдущие сообщения новому клиенту
+    // Отправить все предыдущие сообщения новому клиенту
     ws.send(JSON.stringify({ type: 'initial', messages }));
 
     ws.on('message', (message) => {
