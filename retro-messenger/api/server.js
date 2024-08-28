@@ -5,6 +5,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Добавляем заголовок Content-Security-Policy ко всем ответам
+app.use((req, res, next) => {
+    res.setHeader(
+        'Content-Security-Policy',
+        "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+    );
+    next();
+});
+
 let messages = []; // Хранилище сообщений
 let clients = [];  // Хранилище клиентов для долгих опросов
 
