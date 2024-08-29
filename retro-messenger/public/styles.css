@@ -5,6 +5,7 @@ body {
     font-family: 'Courier New', Courier, monospace;
     margin: 0;
     padding: 0;
+    overflow: hidden; /* Отключаем прокрутку страницы */
 }
 
 .container {
@@ -29,12 +30,15 @@ main {
     display: flex;
     flex: 1;
     gap: 20px;
+    overflow: hidden; /* Предотвращаем прокрутку основного контента */
 }
 
 .sidebar {
     flex: 1;
     border-right: 1px solid #0f0;
     padding: 10px;
+    box-sizing: border-box;
+    overflow-y: auto;
 }
 
 .sidebar h2 {
@@ -46,13 +50,14 @@ main {
     padding: 10px;
     border: 1px solid #0f0;
     height: calc(100vh - 200px);
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .content {
     flex: 3;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .message-list {
@@ -60,7 +65,7 @@ main {
     padding: 10px;
     border: 1px solid #0f0;
     flex: 1;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .message-form {
@@ -77,6 +82,7 @@ textarea {
     font-family: 'Courier New', Courier, monospace;
     resize: none;
     height: 100px;
+    box-sizing: border-box;
 }
 
 button {
@@ -97,7 +103,7 @@ footer p {
     margin: 0;
 }
 
-/* Адаптивные стили */
+/* Адаптивные стили для мобильных устройств */
 @media (max-width: 768px) {
     .container {
         padding: 10px;
@@ -111,19 +117,15 @@ footer p {
     .sidebar {
         border-right: none;
         border-bottom: 1px solid #0f0;
-        padding-bottom: 10px;
-    }
-
-    .thread-list {
-        height: auto;
+        padding: 5px;
     }
 
     .content {
-        flex: none;
+        flex: 1;
     }
 
-    h1 {
-        font-size: 1.5em;
+    .message-list {
+        margin: 10px 0;
     }
 
     textarea {
@@ -133,36 +135,9 @@ footer p {
     button {
         padding: 8px;
     }
-}
-
-@media (max-width: 480px) {
-    .container {
-        padding: 5px;
-    }
 
     h1 {
-        font-size: 1.2em;
-    }
-
-    .sidebar h2 {
-        font-size: 1em;
-    }
-
-    .thread-list, .message-list {
-        margin: 10px 0;
-        padding: 5px;
-        font-size: 0.9em;
-    }
-
-    textarea {
-        height: 60px;
-        padding: 5px;
-        font-size: 0.9em;
-    }
-
-    button {
-        padding: 6px;
-        font-size: 0.9em;
+        font-size: 1.5em;
     }
 
     footer p {
