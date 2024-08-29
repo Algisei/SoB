@@ -97,3 +97,75 @@ footer p {
     margin: 0;
 }
 
+/* Адаптивные стили */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    main {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .sidebar {
+        border-right: none;
+        border-bottom: 1px solid #0f0;
+        padding-bottom: 10px;
+    }
+
+    .thread-list {
+        height: auto;
+    }
+
+    .content {
+        flex: none;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+
+    textarea {
+        height: 80px;
+    }
+
+    button {
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 5px;
+    }
+
+    h1 {
+        font-size: 1.2em;
+    }
+
+    .sidebar h2 {
+        font-size: 1em;
+    }
+
+    .thread-list, .message-list {
+        margin: 10px 0;
+        padding: 5px;
+        font-size: 0.9em;
+    }
+
+    textarea {
+        height: 60px;
+        padding: 5px;
+        font-size: 0.9em;
+    }
+
+    button {
+        padding: 6px;
+        font-size: 0.9em;
+    }
+
+    footer p {
+        font-size: 0.7em;
+    }
+}
