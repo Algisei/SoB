@@ -3,11 +3,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const textarea = messageForm.querySelector('textarea');
     const messageList = document.querySelector('.message-list');
     const threadList = document.querySelector('.thread-list');
-    const userIdSpan = document.getElementById('user-id');
+    // const userIdSpan = document.getElementById('user-id');
 
-    // Генерация случайного идентификатора пользователя
-    const userId = 'user_' + Math.random().toString(36).substr(2, 9);
-    userIdSpan.textContent = userId;  // Отображение идентификатора на странице
+    // // Генерация случайного идентификатора пользователя
+    // const userId = 'user_' + Math.random().toString(36).substr(2, 9);
+    // userIdSpan.textContent = userId;  // Отображение идентификатора на странице
 
     // Подключение к WebSocket серверу
     const ws = new WebSocket('wss://retro-messenger.onrender.com');
@@ -22,24 +22,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Отправка нового сообщения
-    messageForm.querySelector('button').addEventListener('click', () => {
-        const message = textarea.value.trim();
-        if (message) {
-            ws.send(JSON.stringify({ type: 'message', userId, message }));
-            textarea.value = ''; // Очистка поля после отправки
+    // Отправка сообщения при клике на кнопку "Send"
+    messageForm.querySelector('button').addEventListener('click', sendMessage);
+
+    // Отправка сообщения по нажатию клавиши "Enter"
+    textarea.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault(); // Предотвращаем перенос строки
+            sendMessage();
         }
     });
 
-    // Функция для добавления сообщения в список
+    // Функция отправки сообщения
+    function sendMessage() {
+        const message = textarea.value.trim();
+        if (message) {
+            const userId = generateUserId();
+            ws.send(JSON.stringify({ type: 'message', userId, message }));
+            textarea.value = '';
+        }
+    }
+
+    // Генерация уникального идентификатора пользователя
+    function generateUserId() {
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            const newUserId = 'user-' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('userId', newUserId);
+            return newUserId;
+        }
+        return userId;
+    }
+
+    // Добавление сообщения в список
     function addMessageToList(message) {
         const messageElement = document.createElement('div');
         messageElement.textContent = `[${message.timestamp}] ${message.userId}: ${message.message}`;
         messageList.appendChild(messageElement);
-        messageList.scrollTop = messageList.scrollHeight; // Прокрутка вниз к последнему сообщению
+        messageList.scrollTop = messageList.scrollHeight;
     }
 
-    // Треды
+    // Примерные потоки
     const threads = ['Thread 1', 'Thread 2', 'Thread 3'];
     threads.forEach(thread => {
         const threadElement = document.createElement('div');
