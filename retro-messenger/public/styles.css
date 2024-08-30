@@ -1,42 +1,47 @@
-/* styles.css */
 body {
     background-color: #000;
     color: #0f0;
     font-family: 'Courier New', Courier, monospace;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Отключаем прокрутку страницы */
-}
-
-.container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     height: 100vh;
 }
 
+.container {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
 header, footer {
     text-align: center;
+    padding: 5px;
 }
 
 h1 {
-    font-size: 2em;
+    font-size: 1.5em;
     margin: 0;
 }
 
 main {
     display: flex;
     flex: 1;
-    gap: 20px;
-    overflow: hidden; /* Предотвращаем прокрутку основного контента */
+    gap: 10px;
+    overflow: hidden;
+    height: calc(100% - 70px);
 }
 
 .sidebar {
     flex: 1;
     border-right: 1px solid #0f0;
-    padding: 10px;
+    padding: 5px;
     box-sizing: border-box;
     overflow-y: auto;
 }
@@ -46,11 +51,12 @@ main {
 }
 
 .thread-list {
-    margin-top: 10px;
-    padding: 10px;
+    margin-top: 5px;
+    padding: 5px;
     border: 1px solid #0f0;
-    height: calc(100vh - 200px);
+    height: calc(100% - 50px);
     overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .content {
@@ -61,28 +67,52 @@ main {
 }
 
 .message-list {
-    margin: 20px 0;
-    padding: 10px;
+    margin: 5px 0;
+    padding: 5px;
     border: 1px solid #0f0;
     flex: 1;
     overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .message-form {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 5px;
+    padding-bottom: 5px;
+    box-sizing: border-box;
+    position: relative;
 }
 
 textarea {
     background-color: #000;
     color: #0f0;
     border: 1px solid #0f0;
-    padding: 10px;
+    padding: 5px;
     font-family: 'Courier New', Courier, monospace;
     resize: none;
-    height: 100px;
+    height: 70px;
     box-sizing: border-box;
+    caret-color: #0f0; /* Включаем стандартный мигающий курсор */
+    position: relative;
+}
+
+textarea.blinking-cursor::after {
+    content: '';
+    position: absolute;
+    left: 10px; /* Корректируем положение курсора */
+    bottom: 10px;
+    width: 1px;
+    height: 1.2em;
+    background-color: #0f0;
+    animation: blink 1s step-end infinite;
+}
+
+/* Анимация мигающего курсора */
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
 }
 
 button {
@@ -103,10 +133,31 @@ footer p {
     margin: 0;
 }
 
+/* Стили для меню в стиле ретро */
+.menu-bar {
+    display: flex;
+    background-color: #333;
+    color: #0f0;
+    padding: 5px 10px;
+    border-bottom: 1px solid #0f0;
+    box-sizing: border-box;
+}
+
+.menu-item {
+    margin-right: 20px;
+    cursor: pointer;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.menu-item:hover {
+    color: #fff;
+}
+
 /* Адаптивные стили для мобильных устройств */
 @media (max-width: 768px) {
     .container {
         padding: 10px;
+        height: 100%;
     }
 
     main {
@@ -129,7 +180,7 @@ footer p {
     }
 
     textarea {
-        height: 80px;
+        height: 60px;
     }
 
     button {
@@ -137,7 +188,7 @@ footer p {
     }
 
     h1 {
-        font-size: 1.5em;
+        font-size: 1.2em;
     }
 
     footer p {
