@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
@@ -22,6 +21,8 @@ wss.on('connection', (ws) => {
 
     ws.on('message', (message) => {
         const data = JSON.parse(message);
+
+        // Обработка отправки текстового сообщения
         if (data.type === 'message') {
             const newMessage = {
                 id: Date.now(),
@@ -31,10 +32,27 @@ wss.on('connection', (ws) => {
             };
             messages.push(newMessage);
 
-            // Рассылко нового сообщения всем подключенным клиентам
+            // Рассылаем новое сообщение всем клиентам
             wss.clients.forEach((client) => {
                 if (client.readyState === WebSocket.OPEN) {
                     client.send(JSON.stringify({ type: 'message', message: newMessage }));
+                }
+            });
+        }
+
+        // Обработка отправки изображения
+        if (data.type === 'image') {
+            const newImage = {
+                id: Date.now(),
+                userId: data.userId,
+                image: data.image, // Base64 изображение
+                timestamp: new Date().toISOString(),
+            };
+
+            // Рассылаем изображение всем клиентам
+            wss.clients.forEach((client) => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify({ type: 'image', image: newImage }));
                 }
             });
         }

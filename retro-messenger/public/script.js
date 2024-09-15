@@ -3,12 +3,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const textarea = messageForm.querySelector('textarea');
     const messageList = document.querySelector('.message-list');
     const threadList = document.querySelector('.thread-list');
-    // const userIdSpan = document.getElementById('user-id');
+    const userIdSpan = document.getElementById('user-id'); // Раскомментировано
 
-    // // Генерация случайного идентификатора пользователя
-    const userId = 'user_' + Math.random().toString(36).substr(2, 9);
+    // Генерация случайного идентификатора пользователя
+    const userId = generateUserId();
     userIdSpan.textContent = userId;  // Отображение идентификатора на странице
-
 
     // Подключение к WebSocket серверу
     const ws = new WebSocket('wss://retro-messenger.onrender.com');
@@ -38,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function sendMessage() {
         const message = textarea.value.trim();
         if (message) {
-            const userId = generateUserId();
             ws.send(JSON.stringify({ type: 'message', userId, message }));
             textarea.value = '';
         }
@@ -46,13 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Генерация уникального идентификатора пользователя
     function generateUserId() {
-        const userId = localStorage.getItem('userId');
-        if (!userId) {
+        const storedUserId = localStorage.getItem('userId');
+        if (!storedUserId) {
             const newUserId = 'user-' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('userId', newUserId);
             return newUserId;
         }
-        return userId;
+        return storedUserId;
     }
 
     // Добавление сообщения в список

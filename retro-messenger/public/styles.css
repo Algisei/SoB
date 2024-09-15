@@ -223,6 +223,12 @@ textarea:focus {
     color: #fff;
 }
 
+.message-list img {
+    max-width: 200px;
+    margin: 10px 0;
+}
+
+
 /* Адаптивные стили для мобильных устройств */
 @media (max-width: 768px) {
     .container {
