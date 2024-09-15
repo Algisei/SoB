@@ -6,8 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // const userIdSpan = document.getElementById('user-id');
 
     // // Генерация случайного идентификатора пользователя
-    // const userId = 'user_' + Math.random().toString(36).substr(2, 9);
-    // userIdSpan.textContent = userId;  // Отображение идентификатора на странице
+    const userId = 'user_' + Math.random().toString(36).substr(2, 9);
+    userIdSpan.textContent = userId;  // Отображение идентификатора на странице
+
 
     // Подключение к WebSocket серверу
     const ws = new WebSocket('wss://retro-messenger.onrender.com');
@@ -61,6 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
         messageList.appendChild(messageElement);
         messageList.scrollTop = messageList.scrollHeight;
     }
+
+   
 
     // Примерные потоки
     const threads = ['Thread 1', 'Thread 2', 'Thread 3'];

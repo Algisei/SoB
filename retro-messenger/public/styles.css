@@ -8,6 +8,7 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    cursor: none; /* Скрыть стандартный курсор */
 }
 
 .container {
@@ -93,14 +94,14 @@ textarea {
     resize: none;
     height: 70px;
     box-sizing: border-box;
-    caret-color: #0f0; /* Включаем стандартный мигающий курсор */
+    caret-color: #0f0;
     position: relative;
 }
 
 textarea.blinking-cursor::after {
     content: '';
     position: absolute;
-    left: 10px; /* Корректируем положение курсора */
+    right: 10px;
     bottom: 10px;
     width: 1px;
     height: 1.2em;
@@ -132,6 +133,75 @@ footer p {
     font-size: 0.8em;
     margin: 0;
 }
+
+/* Анимированный курсор */
+.cursor {
+    width: 16px;
+    height: 16px;
+    background-color: #0f0;
+    position: absolute;
+    pointer-events: none;
+    z-index: 10000;
+    animation: blink-cursor 1s step-start infinite;
+}
+
+@keyframes blink-cursor {
+    50% {
+        opacity: 0;
+    }
+}
+
+body::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    background-color: #0f0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    animation: move 0.05s infinite;
+}
+
+@keyframes move {
+    to {
+        transform: translate(var(--cursorX), var(--cursorY));
+    }
+}
+
+body {
+    --cursorX: 0px;
+    --cursorY: 0px;
+}
+
+/* Стиль для ссылки */
+a {
+    cursor: none; /* Убираем стандартный курсор для ссылок */
+    position: relative;
+}
+
+/* Стиль для кнопок */
+button {
+    cursor: none; /* Убираем стандартный курсор для кнопок */
+    position: relative;
+}
+
+/* Стиль для текстовых полей */
+textarea {
+    cursor: none; /* Убираем стандартный курсор для текстовых полей */
+}
+
+/* Курсор в состоянии hover */
+.menu-item:hover {
+    color: #fff;
+}
+
+/* Курсор в состоянии focus */
+textarea:focus {
+    outline: none;
+    border: 1px solid #0f0;
+}
+
 
 /* Стили для меню в стиле ретро */
 .menu-bar {

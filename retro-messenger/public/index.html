@@ -32,14 +32,22 @@
                 </div>
                 <div class="message-form">
                     <textarea placeholder="Enter your message..."></textarea>
+                    <input type="file" accept="image/*" id="image-upload">
                     <button>Send</button>
                 </div>
             </div>
+            
         </main>
         <footer>
             <p>&copy; 2024 Retro Messenger</p>
         </footer>
     </div>
     <script src="/script.js"></script>
+    <script>
+       document.addEventListener('mousemove', (e) => {
+    document.body.style.setProperty('--cursorX', `${e.clientX}px`);
+    document.body.style.setProperty('--cursorY', `${e.clientY}px`);
+    });
+    </script>
 </body>
 </html>
