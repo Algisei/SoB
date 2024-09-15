@@ -41,21 +41,22 @@ wss.on('connection', (ws) => {
         }
 
         // Обработка отправки изображения
-        if (data.type === 'image') {
-            const newImage = {
-                id: Date.now(),
-                userId: data.userId,
-                image: data.image, // Base64 изображение
-                timestamp: new Date().toISOString(),
-            };
+if (data.type === 'image') {
+    const newImage = {
+        id: Date.now(),
+        userId: data.userId,
+        image: data.image,  // Base64 изображение
+        timestamp: new Date().toISOString(),
+    };
 
-            // Рассылаем изображение всем клиентам
-            wss.clients.forEach((client) => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify({ type: 'image', image: newImage }));
-                }
-            });
+    // Рассылаем изображение всем клиентам
+    wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ type: 'image', image: newImage }));
         }
+    });
+}
+
     });
 
     ws.on('close', () => {
