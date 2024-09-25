@@ -1,0 +1,150 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f4f4f4;
+    color: #333;
+    background-image: url('bgrnd.jpg'); /* Добавляем фоновое изображение */
+    background-size: cover; /* Изображение масштабируется, чтобы покрыть всю секцию */
+    background-position: center; /* Центрирование изображения */
+    background-repeat: no-repeat; /* Изображение не повторяется */
+    background-attachment: fixed;
+    scroll-behavior: smooth; /* Плавный переход при прокрутке */
+}
+
+
+
+nav {
+    background-color: #35424a;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Меню всегда поверх контента */
+    padding: 10px 0;
+}
+
+nav ul {
+    list-style: none;
+    text-align: center;
+}
+
+nav ul li {
+    display: inline;
+    margin-right: 20px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 10px 15px;
+    transition: background-color 0.3s ease;
+}
+
+nav ul li a:hover {
+    background-color: #4583a0; /* Меняется цвет фона при наведении */
+    border-radius: 5px;
+}
+nav ul li a.active {
+    background-color: #4583a0; /* Меняем цвет активной ссылки */
+    border-radius: 5px;
+}
+
+
+
+
+
+section {
+    
+    color: rgb(46, 131, 154);
+    padding: 20px 0;
+    text-align: center;
+    height: 100vh; /* Секция занимает 100% высоты экрана */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 1.5s ease; /* Переход для любых изменений стиля */
+}
+
+footer {
+    background-color: #35424a;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    height: 100vh; /* Секция занимает 100% высоты экрана */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form label {
+    margin-top: 10px;
+}
+
+form input[type="text"],
+form input[type="email"] {
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+form input[type="submit"] {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #35424a;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+form input[type="submit"]:hover {
+    background-color: #4583a0;
+}
+
+/* Медиазапросы для мобильных устройств */
+@media (max-width: 768px) {
+    nav ul {
+        text-align: center;
+    }
+    nav ul li {
+        display: block;
+        margin: 10px 0;
+    }
+
+    header, section, footer {
+        padding: 10px;
+    }
+
+    section {
+        margin: 10px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 0 5px;
+    }
+    header h1 {
+        font-size: 24px;
+    }
+    section h2 {
+        font-size: 20px;
+    }
+    nav ul li {
+        margin-right: 0;
+    }
+}

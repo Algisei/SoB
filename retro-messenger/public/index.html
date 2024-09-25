@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="custom-cursor"></div>
     <div class="container">
         <!-- Меню в стиле ретро -->
         <nav class="menu-bar">
@@ -22,21 +23,16 @@
         <main>
             <div class="sidebar">
                 <h2>Threads</h2>
-                <div class="thread-list">
-                    <!-- Список потоков будет динамически добавлен здесь -->
-                </div>
+                <div class="thread-list"></div>
             </div>
             <div class="content">
-                <div class="message-list">
-                    <!-- Список сообщений будет динамически добавлен здесь -->
-                </div>
+                <div class="message-list"></div>
                 <div class="message-form">
                     <textarea placeholder="Enter your message..."></textarea>
                     <input type="file" accept="image/*" id="image-upload">
                     <button>Send</button>
                 </div>
             </div>
-            
         </main>
         <footer>
             <p>&copy; 2024 Retro Messenger</p>
@@ -44,10 +40,36 @@
     </div>
     <script src="/script.js"></script>
     <script>
-       document.addEventListener('mousemove', (e) => {
-    document.body.style.setProperty('--cursorX', `${e.clientX}px`);
-    document.body.style.setProperty('--cursorY', `${e.clientY}px`);
-    });
+        const cursor = document.querySelector('.custom-cursor');
+
+        // Перемещение курсора
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+        });
+
+        // Изменение стиля курсора при наведении
+        const interactiveElements = ['button', 'textarea', 'input', 'a', '.menu-item', '.message-list img'];
+
+        interactiveElements.forEach(selector => {
+            document.querySelectorAll(selector).forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    if (selector === 'textarea' || selector === 'input') {
+                        cursor.classList.add('text-cursor');
+                    } else if (selector === 'button') {
+                        cursor.classList.add('pointer-cursor');
+                    } else if (selector === 'a' || selector === '.menu-item') {
+                        cursor.classList.add('link-cursor');
+                    } else if (selector === '.message-list img') {
+                        cursor.classList.add('image-cursor');
+                    }
+                });
+                el.addEventListener('mouseleave', () => {
+                    cursor.classList.remove('text-cursor', 'pointer-cursor', 'link-cursor', 'image-cursor');
+                });
+            });
+        });
     </script>
 </body>
+
+
 </html>
